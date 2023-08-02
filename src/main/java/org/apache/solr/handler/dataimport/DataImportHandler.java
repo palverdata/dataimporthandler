@@ -24,6 +24,7 @@ import java.util.Map;
 
 import org.apache.solr.common.SolrException;
 import org.apache.solr.common.SolrInputDocument;
+import org.apache.solr.common.MapWriter.EntryWriter;
 import org.apache.solr.common.params.CommonParams;
 import org.apache.solr.common.params.MapSolrParams;
 import org.apache.solr.common.params.ModifiableSolrParams;
@@ -282,26 +283,26 @@ public class DataImportHandler extends RequestHandlerBase implements
   @Override
   public void initializeMetrics(SolrMetricsContext parentContext, String scope) {
     super.initializeMetrics(parentContext, scope);
-    metrics = new MetricsMap((detailed, map) -> {
+    metrics = new MetricsMap((EntryWriter ew) -> {
       if (importer != null) {
         DocBuilder.Statistics cumulative = importer.cumulativeStatistics;
 
-        map.put("Status", importer.getStatus().toString());
+        ew.put("Status", importer.getStatus().toString());
 
         if (importer.docBuilder != null) {
           DocBuilder.Statistics running = importer.docBuilder.importStatistics;
-          map.put("Documents Processed", running.docCount);
-          map.put("Requests made to DataSource", running.queryCount);
-          map.put("Rows Fetched", running.rowsCount);
-          map.put("Documents Deleted", running.deletedDocCount);
-          map.put("Documents Skipped", running.skipDocCount);
+          ew.put("Documents Processed", running.docCount);
+          ew.put("Requests made to DataSource", running.queryCount);
+          ew.put("Rows Fetched", running.rowsCount);
+          ew.put("Documents Deleted", running.deletedDocCount);
+          ew.put("Documents Skipped", running.skipDocCount);
         }
 
-        map.put(DataImporter.MSG.TOTAL_DOC_PROCESSED, cumulative.docCount);
-        map.put(DataImporter.MSG.TOTAL_QUERIES_EXECUTED, cumulative.queryCount);
-        map.put(DataImporter.MSG.TOTAL_ROWS_EXECUTED, cumulative.rowsCount);
-        map.put(DataImporter.MSG.TOTAL_DOCS_DELETED, cumulative.deletedDocCount);
-        map.put(DataImporter.MSG.TOTAL_DOCS_SKIPPED, cumulative.skipDocCount);
+        ew.put(DataImporter.MSG.TOTAL_DOC_PROCESSED, cumulative.docCount);
+        ew.put(DataImporter.MSG.TOTAL_QUERIES_EXECUTED, cumulative.queryCount);
+        ew.put(DataImporter.MSG.TOTAL_ROWS_EXECUTED, cumulative.rowsCount);
+        ew.put(DataImporter.MSG.TOTAL_DOCS_DELETED, cumulative.deletedDocCount);
+        ew.put(DataImporter.MSG.TOTAL_DOCS_SKIPPED, cumulative.skipDocCount);
       }
     });
     solrMetricsContext.gauge(metrics, true, "importer", getCategory().toString(), scope);
